@@ -183,7 +183,6 @@ function setupDragAndDrop() {
         }
     }
 }
-}
 
 // Handle file input change
 function setupFileInput() {

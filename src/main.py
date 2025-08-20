@@ -10,18 +10,20 @@ import logging
 import platform
 from typing import List, Optional
 from datetime import datetime
-import mimetypes
 from pathlib import Path
 
 from fastapi import FastAPI, File, UploadFile, HTTPException, Request, Form
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
+from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
 from azure.storage.blob.aio import BlobServiceClient
-from azure.identity.aio import DefaultAzureCredential, ChainedTokenCredential, AzureCliCredential, ManagedIdentityCredential
+from azure.identity.aio import (
+    DefaultAzureCredential, ChainedTokenCredential, 
+    AzureCliCredential, ManagedIdentityCredential
+)
 from azure.core.exceptions import ClientAuthenticationError, ResourceNotFoundError, ServiceRequestError
 from azure.storage.blob import ContentSettings
 

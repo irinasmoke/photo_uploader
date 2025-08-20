@@ -6,19 +6,19 @@
 let currentFile = null;
 let isUploading = false;
 
-// DOM elements
-const fileInput = document.getElementById('file');
-const dropZone = document.getElementById('dropZone');
-const filePreview = document.getElementById('filePreview');
-const previewImage = document.getElementById('previewImage');
-const fileName = document.getElementById('fileName');
-const fileSize = document.getElementById('fileSize');
-const removeFileBtn = document.getElementById('removeFile');
-const uploadForm = document.getElementById('uploadForm');
-const submitBtn = document.getElementById('submitBtn');
-const progressContainer = document.getElementById('progressContainer');
-const progressBar = document.getElementById('progressBar');
-const progressText = document.getElementById('progressText');
+// DOM elements - initialized in init() function
+let fileInput = null;
+let dropZone = null;
+let filePreview = null;
+let previewImage = null;
+let fileName = null;
+let fileSize = null;
+let removeFileBtn = null;
+let uploadForm = null;
+let submitBtn = null;
+let progressContainer = null;
+let progressBar = null;
+let progressText = null;
 
 // File size formatter
 function formatFileSize(bytes) {
@@ -84,17 +84,19 @@ function displayFilePreview(file) {
     try {
         validateFile(file);
         
-        fileName.textContent = file.name;
-        fileSize.textContent = formatFileSize(file.size);
+        if (fileName) fileName.textContent = file.name;
+        if (fileSize) fileSize.textContent = formatFileSize(file.size);
         
         // Create image preview
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            previewImage.src = e.target.result;
-            previewImage.alt = file.name;
-            filePreview.classList.remove('hidden');
-        };
-        reader.readAsDataURL(file);
+        if (previewImage && filePreview) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.src = e.target.result;
+                previewImage.alt = file.name;
+                filePreview.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
         
         currentFile = file;
         updateSubmitButton();
@@ -107,17 +109,19 @@ function displayFilePreview(file) {
 
 // Clear file preview
 function clearFilePreview() {
-    filePreview.classList.add('hidden');
-    previewImage.src = '';
-    fileName.textContent = '';
-    fileSize.textContent = '';
-    fileInput.value = '';
+    if (filePreview) filePreview.classList.add('hidden');
+    if (previewImage) previewImage.src = '';
+    if (fileName) fileName.textContent = '';
+    if (fileSize) fileSize.textContent = '';
+    if (fileInput) fileInput.value = '';
     currentFile = null;
     updateSubmitButton();
 }
 
 // Update submit button state
 function updateSubmitButton() {
+    if (!submitBtn) return;
+    
     if (isUploading) {
         submitBtn.disabled = true;
         submitBtn.classList.add('btn-loading');
@@ -135,6 +139,8 @@ function updateSubmitButton() {
 
 // Handle drag and drop
 function setupDragAndDrop() {
+    if (!dropZone) return;
+    
     // Prevent default drag behaviors
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
         dropZone.addEventListener(eventName, preventDefaults, false);
@@ -159,11 +165,11 @@ function setupDragAndDrop() {
     }
     
     function highlight() {
-        dropZone.classList.add('drag-over');
+        if (dropZone) dropZone.classList.add('drag-over');
     }
     
     function unhighlight() {
-        dropZone.classList.remove('drag-over');
+        if (dropZone) dropZone.classList.remove('drag-over');
     }
     
     function handleDrop(e) {
@@ -172,14 +178,17 @@ function setupDragAndDrop() {
         
         if (files.length > 0) {
             const file = files[0];
-            fileInput.files = files; // Update the input
+            if (fileInput) fileInput.files = files; // Update the input
             displayFilePreview(file);
         }
     }
 }
+}
 
 // Handle file input change
 function setupFileInput() {
+    if (!fileInput) return;
+    
     fileInput.addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
@@ -263,13 +272,15 @@ function showProgress() {
 function hideProgress() {
     if (progressContainer) {
         progressContainer.classList.add('hidden');
-        progressBar.style.width = '0%';
-        progressText.textContent = 'Uploading...';
+        if (progressBar) progressBar.style.width = '0%';
+        if (progressText) progressText.textContent = 'Uploading...';
     }
 }
 
 // Animate progress bar
 function animateProgress() {
+    if (!progressBar || !progressText) return;
+    
     let progress = 0;
     const interval = setInterval(() => {
         progress += Math.random() * 15;
@@ -290,8 +301,8 @@ function completeProgress() {
     if (window.uploadProgressInterval) {
         clearInterval(window.uploadProgressInterval);
     }
-    progressBar.style.width = '100%';
-    progressText.textContent = 'Upload complete!';
+    if (progressBar) progressBar.style.width = '100%';
+    if (progressText) progressText.textContent = 'Upload complete!';
 }
 
 // Setup keyboard shortcuts
@@ -370,6 +381,20 @@ function setupTooltips() {
 
 // Initialize the application
 function init() {
+    // Initialize DOM elements
+    fileInput = document.getElementById('file');
+    dropZone = document.getElementById('dropZone');
+    filePreview = document.getElementById('filePreview');
+    previewImage = document.getElementById('previewImage');
+    fileName = document.getElementById('fileName');
+    fileSize = document.getElementById('fileSize');
+    removeFileBtn = document.getElementById('removeFile');
+    uploadForm = document.getElementById('uploadForm');
+    submitBtn = document.getElementById('submitBtn');
+    progressContainer = document.getElementById('progressContainer');
+    progressBar = document.getElementById('progressBar');
+    progressText = document.getElementById('progressText');
+
     // Only initialize if we're on the upload page
     if (uploadForm) {
         setupDragAndDrop();

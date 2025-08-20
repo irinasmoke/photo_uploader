@@ -10,18 +10,20 @@ import logging
 import platform
 from typing import List, Optional
 from datetime import datetime
-import mimetypes
 from pathlib import Path
 
 from fastapi import FastAPI, File, UploadFile, HTTPException, Request, Form
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
 from azure.storage.blob.aio import BlobServiceClient
-from azure.identity.aio import DefaultAzureCredential, ChainedTokenCredential, AzureCliCredential, ManagedIdentityCredential
+from azure.identity.aio import (
+    DefaultAzureCredential, ChainedTokenCredential, 
+    AzureCliCredential, ManagedIdentityCredential
+)
 from azure.core.exceptions import ClientAuthenticationError, ResourceNotFoundError, ServiceRequestError
 from azure.storage.blob import ContentSettings
 
@@ -297,6 +299,36 @@ class SecurePhotoUploader:
             safe_log("error", f"Error listing photos: {e}", "❌", "ERROR")
             raise HTTPException(status_code=500, detail=f"Failed to list photos: {str(e)}")
     
+    async def get_photo_data(self, blob_name: str) -> tuple[bytes, str]:
+        """Get photo data and content type from storage"""
+        try:
+            blob_service_client = await self._get_blob_service_client()
+            blob_client = blob_service_client.get_blob_client(
+                container=self.config.container_name,
+                blob=blob_name
+            )
+            
+            # Download blob data
+            blob_data = await blob_client.download_blob()
+            content = await blob_data.readall()
+            
+            # Get blob properties for content type
+            properties = await blob_client.get_blob_properties()
+            content_type = (
+                properties.content_settings.content_type 
+                if properties.content_settings and properties.content_settings.content_type
+                else 'application/octet-stream'
+            )
+            
+            safe_log("info", f"Retrieved photo data for: {blob_name} ({len(content)} bytes)", "✅", "SUCCESS")
+            return content, content_type
+            
+        except ResourceNotFoundError:
+            raise HTTPException(status_code=404, detail="Photo not found")
+        except Exception as e:
+            safe_log("error", f"Error retrieving photo {blob_name}: {e}", "❌", "ERROR")
+            raise HTTPException(status_code=500, detail=f"Failed to retrieve photo: {str(e)}")
+
     async def delete_photo(self, blob_name: str) -> bool:
         """Delete a photo from storage"""
         try:
@@ -369,6 +401,18 @@ async def get_photos(limit: int = 50, prefix: str = ""):
     """API endpoint to get photos list"""
     photos = await photo_uploader.list_photos(limit=limit, prefix=prefix)
     return JSONResponse({"photos": photos, "count": len(photos)})
+
+@app.get("/api/photos/{blob_name:path}/image")
+async def get_photo_image(blob_name: str):
+    """API endpoint to serve photo image data"""
+    try:
+        content, content_type = await photo_uploader.get_photo_data(blob_name)
+        return Response(content=content, media_type=content_type)
+    except HTTPException:
+        raise
+    except Exception as e:
+        safe_log("error", f"Error serving image {blob_name}: {e}", "❌", "ERROR")
+        raise HTTPException(status_code=500, detail="Failed to serve image")
 
 @app.get("/gallery", response_class=HTMLResponse)
 async def photo_gallery(request: Request, limit: int = 20):

@@ -280,19 +280,25 @@ class SecurePhotoUploader:
             
             photos = []
             async for blob in container_client.list_blobs(name_starts_with=prefix):
-                photos.append({
-                    'name': blob.name,
-                    'size': blob.size,
-                    'last_modified': blob.last_modified.isoformat() if blob.last_modified else None,
-                    'content_type': blob.content_settings.content_type if blob.content_settings else None,
-                    'url': f"{self.config.storage_account_url}/{self.config.container_name}/{blob.name}",
-                    'metadata': blob.metadata or {}
-                })
-                
-                if len(photos) >= limit:
-                    break
+                # Skip folder entries (blobs with size 0 and no content type typically represent folders)
+                # Only include actual image files
+                if blob.size > 0 and blob.content_settings and blob.content_settings.content_type:
+                    # Additional check to ensure it's an image file
+                    content_type = blob.content_settings.content_type.lower()
+                    if content_type.startswith('image/'):
+                        photos.append({
+                            'name': blob.name,
+                            'size': blob.size,
+                            'last_modified': blob.last_modified.isoformat() if blob.last_modified else None,
+                            'content_type': blob.content_settings.content_type,
+                            'url': f"{self.config.storage_account_url}/{self.config.container_name}/{blob.name}",
+                            'metadata': blob.metadata or {}
+                        })
+                        
+                        if len(photos) >= limit:
+                            break
             
-            safe_log("info", f"Listed {len(photos)} photos", "✅", "SUCCESS")
+            safe_log("info", f"Listed {len(photos)} photo files (filtered out folders)", "✅", "SUCCESS")
             return photos
             
         except Exception as e:

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Startup script for the Photo Uploader FastAPI application
-Handles environment configuration and application initialization
+Startup script for the Local Photo Uploader FastAPI application
+Handles local environment configuration and application initialization
 """
 
 import os
@@ -49,36 +49,38 @@ def setup_logging():
     return logger
 
 def validate_environment():
-    """Validate required environment variables"""
-    required_vars = ['AZURE_STORAGE_ACCOUNT_NAME']
-    missing_vars = [var for var in required_vars if not os.getenv(var)]
+    """Validate required environment variables and setup"""
+    # For local application, just ensure basic directories exist
+    upload_dir = Path("uploads/photos")
+    metadata_dir = Path("uploads/metadata")
     
-    if missing_vars:
-        print(f"[ERROR] Missing required environment variables: {', '.join(missing_vars)}")
-        print("[INFO] Please set the required environment variables or run 'azd up' to deploy infrastructure first.")
-        sys.exit(1)
+    # Create directories if they don't exist
+    upload_dir.mkdir(parents=True, exist_ok=True)
+    metadata_dir.mkdir(parents=True, exist_ok=True)
+    
+    logger = logging.getLogger(__name__)
+    logger.info("✅ Upload directories created/verified")
+    
+    return True
 
 def main():
     """Main startup function"""
     logger = setup_logging()
     
-    # Validate environment
+    # Validate environment and setup directories
     validate_environment()
     
-    # Set default values for optional environment variables
-    os.environ.setdefault('AZURE_PHOTO_CONTAINER_NAME', 'photos')
+    # Set default values for application configuration
     os.environ.setdefault('APP_HOST', '0.0.0.0')
     os.environ.setdefault('APP_PORT', '8000')
     
     # Use platform-appropriate logging messages
     if platform.system() == 'Windows':
-        logger.info("[OK] Environment validation passed")
-        logger.info(f"[STORAGE] Storage Account: {os.getenv('AZURE_STORAGE_ACCOUNT_NAME')}")
-        logger.info(f"[CONTAINER] Container: {os.getenv('AZURE_PHOTO_CONTAINER_NAME')}")
+        logger.info("[OK] Local photo uploader ready")
+        logger.info("[STORAGE] Using local file system storage")
     else:
-        logger.info("✅ Environment validation passed")
-        logger.info(f"📦 Storage Account: {os.getenv('AZURE_STORAGE_ACCOUNT_NAME')}")
-        logger.info(f"🗂️ Container: {os.getenv('AZURE_PHOTO_CONTAINER_NAME')}")
+        logger.info("✅ Local photo uploader ready")
+        logger.info("� Using local file system storage")
     
     # Import and run the FastAPI application
     import uvicorn

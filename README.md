@@ -1,330 +1,255 @@
-# �️ Secure Photo Uploader - FastAPI Web Application
+# 🖼️ Local Photo Uploader - FastAPI Web Application
 
-A sleek, production-ready FastAPI web application for uploading photos to Azure Blob Storage with enterprise-grade security using Azure RBAC (Role-Based Access Control) and managed identity.
+A simple, fast FastAPI web application for uploading and managing photos locally with a modern web interface.
 
 ## ✨ Features
 
 ### 🌟 Modern Web Interface
-- **Sleek FastAPI Application** - Modern, responsive web interface
+- **FastAPI Application** - Modern, responsive web interface
 - **Drag & Drop Upload** - Intuitive file upload with drag-and-drop support
 - **Real-time Progress** - Visual upload progress and feedback
 - **Photo Gallery** - Browse and manage uploaded photos
 - **Responsive Design** - Works perfectly on desktop and mobile devices
 
-### 🛡️ Security Features
+### 🛡️ File Management Features
+- **Local Storage** - All photos stored securely on your local filesystem
+- **File Validation** - Supports multiple image formats (JPEG, PNG, GIF, WebP, BMP, TIFF)
+- **Metadata Storage** - JSON metadata files store upload information and tags
+- **File Size Limits** - Configurable maximum file size (default: 100MB)
+- **Album Organization** - Tag photos with album names and descriptions
 
-This solution implements **zero-trust security principles** and Azure security best practices:
-
-### Authentication & Authorization
-- ✅ **Azure Managed Identity** - No hardcoded keys or secrets
-- ✅ **Azure RBAC** - Fine-grained access control using built-in roles
-- ✅ **Principle of Least Privilege** - Minimal required permissions only
-- ✅ **Identity-based Authentication** - Shared key access disabled
-
-### Data Protection
-- ✅ **HTTPS Only** - All communications encrypted in transit (TLS 1.2+)
-- ✅ **Encryption at Rest** - Server-side encryption with infrastructure encryption
-- ✅ **Private Container Access** - No anonymous access allowed
-- ✅ **Blob Versioning** - Data protection and recovery capabilities
-
-### Network Security
-- ✅ **Configurable Network Access** - Can be restricted to private endpoints
-- ✅ **IP Whitelisting Support** - Network-level access controls
-- ✅ **Azure Services Bypass** - Secure access for trusted Azure services
-
-### Compliance & Monitoring
-- ✅ **Audit Trail** - Comprehensive logging and monitoring
-- ✅ **Retention Policies** - Automated data lifecycle management
-- ✅ **Change Feed** - Track all blob modifications
-- ✅ **Soft Delete** - Protection against accidental deletion
+### 📁 Storage Structure
+```
+src/
+├── uploads/
+│   └── photos/
+│       ├── 2024-01-15_vacation_photo_abc123.jpg
+│       ├── 2024-01-15_vacation_photo_abc123.jpg.metadata.json
+│       └── ...
+├── static/
+├── templates/
+└── main.py
+```
 
 ## 🏗️ Architecture
 
 ```
 ┌─────────────────┐    ┌──────────────────────┐    ┌─────────────────────┐
-│   FastAPI App   │    │  User-Assigned       │    │   Azure Storage     │
-│                 │───▶│  Managed Identity    │───▶│   Account           │
-│ • Web Interface │    │                      │    │ • RBAC Enabled      │
-│ • File Upload   │    │ • No Secrets         │    │ • Private Access    │
-│ • Photo Gallery │    │ • RBAC Permissions   │    │ • Encrypted         │
+│   FastAPI App   │    │  Local File System   │    │   JSON Metadata     │
+│                 │───▶│                      │───▶│   Files             │
+│ • Web Interface │    │ • Image Storage      │    │ • Upload Info       │
+│ • File Upload   │    │ • Directory Based    │    │ • Tags & Albums     │
+│ • Photo Gallery │    │ • Filename Based     │    │ • File Details      │
 │ • REST API      │    │                      │    │                     │
 └─────────────────┘    └──────────────────────┘    └─────────────────────┘
-        │                                                       
-        ▼                                                       
-┌─────────────────┐    ┌──────────────────────┐                
-│ Container Apps  │    │  Container Registry  │                
-│                 │───▶│                      │                
-│ • Auto Scaling  │    │ • Managed Identity   │                
-│ • HTTPS Only    │    │ • Secure Images      │                
-│ • Health Checks │    │                      │                
-└─────────────────┘    └──────────────────────┘                
 ```
 
 ## 🚀 Quick Start
 
-### 1. Prerequisites
-
-- Azure CLI installed and authenticated
-- Azure Developer CLI (`azd`) installed
+### Prerequisites
 - Python 3.8+ installed
-- Appropriate Azure permissions to create resources
+- Git (for cloning the repository)
 
-### 2. Deploy Infrastructure
+### 1. Clone and Setup
 
-```powershell
-# Initialize the project
-azd init
+```bash
+# Clone the repository
+git clone <repository-url>
+cd photo_uploader
 
-# Set your environment variables
-azd env set AZURE_LOCATION "eastus"
-azd env set AZURE_ENV_NAME "photo-secure"
-
-# Deploy to Azure
-azd up
-```
-
-### 3. Run the Application Locally
-
-For local development:
-
-```powershell
-# Run the development script (handles everything automatically)
-.\run.ps1
-```
-
-Or manually:
-
-```powershell
 # Create virtual environment
 python -m venv .venv
-.venv\Scripts\Activate.ps1  # On Windows PowerShell
+
+# Activate virtual environment
+source .venv/bin/activate  # On macOS/Linux
+# or
+.venv\Scripts\activate     # On Windows
 
 # Install dependencies
-pip install -r requirements.txt
-
-# Copy environment template and update with your values
-copy .env.example .env
-# Edit .env with your Azure configuration
-
-# Start the FastAPI application
 cd src
-python start.py
+pip install -r requirements.txt
 ```
 
-The web application will be available at:
-- **Main App**: http://localhost:8000
-- **API Docs**: http://localhost:8000/api/docs
-- **Gallery**: http://localhost:8000/gallery
+### 2. Run the Application
 
-### 4. Deploy to Azure
+There are two ways to start the application:
 
-```powershell
-# Deploy both infrastructure and application
-azd up
+**Option A: Using the startup script (recommended)**
+```bash
+# Make the script executable (first time only)
+chmod +x run.sh
+
+# Start the application
+./run.sh
 ```
 
-After deployment, your app will be available at the generated Container App URL.
+**Option B: Manual startup**
+```bash
+# Navigate to src directory
+cd src
 
-## 📋 Configuration
-
-### Environment Variables
-
-| Variable | Description | Required | Example |
-|----------|-------------|----------|---------|
-| `AZURE_STORAGE_ACCOUNT_NAME` | Storage account name | Yes | `st7a8b9c0d1e2f3` |
-| `AZURE_PHOTO_CONTAINER_NAME` | Container name for photos | No | `photos` (default) |
-| `AZURE_USER_ASSIGNED_IDENTITY_CLIENT_ID` | Managed identity client ID | No* | `12345678-1234-1234-1234-123456789abc` |
-
-*Required when using user-assigned managed identity. Falls back to DefaultAzureCredential if not provided.
-
-### Infrastructure Parameters
-
-| Parameter | Description | Default | Options |
-|-----------|-------------|---------|---------|
-| `environmentName` | Environment name for resources | - | `dev`, `prod`, etc. |
-| `location` | Azure region | - | `eastus`, `westeurope`, etc. |
-| `principalId` | User principal ID for RBAC | - | Your Azure AD user ID |
-
-## 🔧 Advanced Configuration
-
-### Network Security
-
-To restrict access to private endpoints only, modify the storage account in `infra/main.bicep`:
-
-```bicep
-properties: {
-  publicNetworkAccess: 'Disabled'  // Change from 'Enabled'
-  networkAcls: {
-    defaultAction: 'Deny'          // Change from 'Allow'
-    // Add your IP ranges or virtual networks
-    ipRules: [
-      {
-        value: 'your.ip.address.range/24'
-        action: 'Allow'
-      }
-    ]
-  }
-}
+# Run the FastAPI application
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### Custom RBAC Roles
+### 3. Access the Application
 
-The solution uses built-in Azure roles. Available roles:
+Open your browser and navigate to:
+- **Main Application**: http://localhost:8000
+- **Photo Gallery**: http://localhost:8000/gallery
+- **API Documentation**: http://localhost:8000/api/docs
+- **Health Check**: http://localhost:8000/health
 
-- **Storage Blob Data Reader** (`2a2b9908-6ea1-4ae2-8e65-a410df84e7d1`) - Read only
-- **Storage Blob Data Contributor** (`ba92f5b4-2d11-453d-a403-e96b0029c9fe`) - Read/Write (default)
-- **Storage Blob Data Owner** (`b7e6dc6d-f1e8-4753-8033-0f276bb0955b`) - Full control
+## 📸 Usage
 
-### Monitoring and Alerts
+### Upload Photos
+1. Go to http://localhost:8000
+2. Drag and drop image files or click to select
+3. Optionally add album name and description
+4. Click "Upload Photo"
 
-Enable Azure Monitor and set up alerts:
+### View Gallery
+1. Navigate to http://localhost:8000/gallery
+2. Browse your uploaded photos
+3. Photos are displayed with metadata
+4. Click on photos to view details or delete them
 
-```powershell
-# Enable diagnostic settings
-az monitor diagnostic-settings create \
-  --resource $STORAGE_ACCOUNT_ID \
-  --name "storage-diagnostics" \
-  --logs '[{"category": "StorageRead", "enabled": true}, {"category": "StorageWrite", "enabled": true}]' \
-  --workspace $LOG_ANALYTICS_WORKSPACE_ID
+### API Usage
+Use the REST API endpoints:
+- `GET /api/photos` - List all photos
+- `GET /api/photos/{filename}/image` - Get photo image
+- `GET /api/photos/{filename}/details` - Get photo details
+- `DELETE /api/photos/{filename}` - Delete a photo
+
+## 📁 Project Structure
+
+```
+photo_uploader/
+├── src/
+│   ├── main.py              # Main FastAPI application
+│   ├── requirements.txt     # Python dependencies
+│   ├── uploads/
+│   │   ├── photos/          # Local photo storage
+│   │   └── metadata/        # JSON metadata files
+│   ├── static/
+│   │   ├── style.css
+│   │   └── script.js
+│   └── templates/
+│       ├── index.html       # Upload page
+│       ├── gallery.html     # Photo gallery
+│       ├── upload_success.html
+│       └── error.html
+├── run.sh                   # Startup script
+├── README.md
+└── SETUP_COMPLETE.md
 ```
 
-## 🧪 Testing
+## ⚙️ Configuration
 
-### Local Development
-
-For local development, use Azure CLI authentication:
-
-```powershell
-# Login to Azure
-az login
-
-# Set subscription (if needed)
-az account set --subscription "your-subscription-id"
-
-# Run the application
-python src/photo_uploader.py
-```
-
-### Production Testing
-
-In Azure environments (App Service, Container Apps, etc.), managed identity will be used automatically.
-
-## 📚 Code Examples
-
-### Using the Web Interface
-
-1. **Upload Photos**: Open http://localhost:8000 and drag-drop photos or click to select
-2. **Browse Gallery**: Visit http://localhost:8000/gallery to see all uploaded photos
-3. **API Access**: Use http://localhost:8000/api/docs for API documentation
-
-### Using the REST API
+The application can be configured by modifying the `Config` class in `main.py`:
 
 ```python
-import httpx
-
-# Upload a photo via API
-with open("photo.jpg", "rb") as f:
-    response = httpx.post(
-        "http://localhost:8000/upload",
-        files={"file": f},
-        data={"album": "vacation", "description": "Beach sunset"}
-    )
-
-# Get photos list
-response = httpx.get("http://localhost:8000/api/photos")
-photos = response.json()["photos"]
+class Config:
+    def __init__(self):
+        self.upload_dir = Path("uploads/photos")  # Change upload directory
+        self.metadata_dir = Path("uploads/metadata")  # Metadata storage
+        self.max_file_size = 100 * 1024 * 1024   # 100MB max file size
+        self.allowed_extensions = {'.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.tiff'}
 ```
 
-### Programmatic Access (Azure SDK)
+## 🔧 Features
 
-```python
-from src.main import SecurePhotoUploader
+### File Support
+- **Supported Formats**: JPEG, PNG, GIF, WebP, BMP, TIFF
+- **File Size Limit**: 100MB (configurable)
+- **Metadata Storage**: JSON files alongside images
+- **Unique Filenames**: Automatic timestamp-based naming to prevent conflicts
 
-# Initialize uploader
-uploader = SecurePhotoUploader()
+### Web Interface
+- **Modern UI**: Tailwind CSS styling
+- **Responsive Design**: Works on desktop and mobile
+- **Drag & Drop**: Easy file upload
+- **Real-time Feedback**: Upload progress and status
+- **Photo Gallery**: Grid view with details modal
 
-# Upload a photo with metadata
-result = await uploader.upload_photo(
-    file=uploaded_file,
-    blob_name="2024/vacation/beach.jpg",
-    tags={
-        "album": "summer_vacation",
-        "location": "Malibu Beach",
-        "photographer": "John Doe"
-    }
-)
-
-print(f"Uploaded: {result['blob_url']}")
-```
-
-## 🔍 Troubleshooting
+## 🐛 Troubleshooting
 
 ### Common Issues
 
-**Authentication Errors**
-```
-ClientAuthenticationError: Authentication failed
-```
-- ✅ Verify you're logged into Azure CLI: `az login`
-- ✅ Check your managed identity has the correct RBAC roles
-- ✅ Ensure the storage account has shared key access disabled
-
-**Permission Errors**
-```
-Access denied to container 'photos'
-```
-- ✅ Verify RBAC role assignments in the Azure portal
-- ✅ Check the managed identity is assigned to the storage account
-- ✅ Wait a few minutes for role assignments to propagate
-
-**Container Not Found**
-```
-ResourceNotFoundError: Container 'photos' not found
-```
-- ✅ Check the container was created during deployment
-- ✅ Verify the container name in environment variables
-- ✅ Check storage account and container exist in the portal
-
-### Debugging Steps
-
-1. **Check Authentication**:
-   ```powershell
-   az account show  # Verify logged in user
-   az identity show --name "id-<your-resource-token>" --resource-group "<your-rg>"
+1. **Import Errors**: Make sure you've activated the virtual environment and installed dependencies
+   ```bash
+   source .venv/bin/activate  # Activate virtual environment
+   pip install -r src/requirements.txt  # Install dependencies
    ```
 
-2. **Verify RBAC Assignments**:
-   ```powershell
-   az role assignment list --assignee "<managed-identity-principal-id>" --scope "<storage-account-id>"
+2. **Permission Errors**: Ensure the application has write permissions to the uploads directory
+   ```bash
+   chmod 755 src/uploads/  # Set directory permissions
    ```
 
-3. **Test Storage Access**:
-   ```powershell
-   az storage blob list --container-name "photos" --account-name "<storage-account-name>" --auth-mode login
+3. **Port in Use**: Change the port if 8000 is already in use
+   ```bash
+   uvicorn main:app --reload --host 0.0.0.0 --port 8080  # Use port 8080 instead
    ```
+
+4. **Upload Directory Not Found**: The application will create directories automatically, but ensure the src directory exists
+
+### Development
+
+To run in development mode with auto-reload:
+```bash
+cd src
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
+
+## 📝 API Documentation
+
+Once running, visit http://localhost:8000/api/docs for interactive API documentation with Swagger UI.
+
+## 🚀 Deployment
+
+This application is designed to run locally, but you can also deploy it to various platforms:
+
+### Local Production
+```bash
+# Install production dependencies
+pip install gunicorn
+
+# Run with gunicorn
+cd src
+gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
+```
+
+### Docker (Optional)
+If you want to containerize the application:
+```bash
+# Build the Docker image
+docker build -t local-photo-uploader .
+
+# Run the container
+docker run -p 8000:8000 -v ./uploads:/app/uploads local-photo-uploader
+```
 
 ## 🔒 Security Considerations
 
-### Production Deployment
+### Local Deployment
 
-1. **Network Isolation**: Consider using private endpoints for maximum security
-2. **Key Rotation**: While not using keys, rotate managed identity credentials regularly
-3. **Monitoring**: Set up alerts for unusual access patterns
-4. **Backup**: Implement cross-region replication for critical data
-5. **Compliance**: Review data residency and compliance requirements
+1. **File System Permissions**: Ensure proper permissions on upload directories
+2. **Input Validation**: The app validates file types and sizes
+3. **Local Access**: By default, the app binds to all interfaces (0.0.0.0) - use 127.0.0.1 for localhost-only access
+4. **File Storage**: Photos are stored locally with unique filenames to prevent conflicts
 
-### Data Classification
-
-- **Public Data**: Use public containers with appropriate access policies
-- **Confidential Data**: Use private containers with strict RBAC
-- **Highly Sensitive**: Consider customer-managed encryption keys (CMEK)
+### Network Security
+- **HTTPS**: Consider using a reverse proxy (nginx) with SSL for production
+- **Firewall**: Configure firewall rules if exposing to network
+- **Access Control**: Add authentication if needed for multi-user scenarios
 
 ## 📖 Additional Resources
 
-- [Azure Storage Security Guide](https://docs.microsoft.com/azure/storage/common/security-recommendations)
-- [Azure RBAC Best Practices](https://docs.microsoft.com/azure/role-based-access-control/best-practices)
-- [Managed Identity Documentation](https://docs.microsoft.com/azure/active-directory/managed-identities-azure-resources/)
-- [Azure Blob Storage Pricing](https://azure.microsoft.com/pricing/details/storage/blobs/)
+- [FastAPI Documentation](https://fastapi.tiangolo.com/)
+- [Python Virtual Environments](https://docs.python.org/3/tutorial/venv.html)
+- [Uvicorn Server](https://www.uvicorn.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
 
 ## 📄 License
 
@@ -336,4 +261,4 @@ Contributions are welcome! Please read our contributing guidelines and submit pu
 
 ---
 
-**⚡ Built with Azure security best practices for production workloads**
+**⚡ Simple, fast, and reliable local photo management**

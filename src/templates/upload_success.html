@@ -15,7 +15,7 @@
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <i class="fas fa-camera text-2xl text-indigo-600"></i>
-                        <span class="ml-2 text-xl font-bold text-gray-900">Secure Photo Uploader</span>
+                        <span class="ml-2 text-xl font-bold text-gray-900">Local Photo Uploader</span>
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
@@ -41,7 +41,7 @@
                 🎉 Upload Successful!
             </h1>
             <p class="text-lg text-gray-600">
-                Your photo has been securely uploaded to Azure Blob Storage
+                Your photo has been uploaded locally
             </p>
         </div>
 
@@ -57,8 +57,8 @@
                     </div>
                     
                     <div>
-                        <dt class="text-sm font-medium text-gray-500">Blob Name</dt>
-                        <dd class="mt-1 text-sm text-gray-900 break-all">{{ result.blob_name }}</dd>
+                        <dt class="text-sm font-medium text-gray-500">Stored Filename</dt>
+                        <dd class="mt-1 text-sm text-gray-900 break-all">{{ result.filename }}</dd>
                     </div>
                     
                     <div>
@@ -79,11 +79,11 @@
                     </div>
                     
                     <div>
-                        <dt class="text-sm font-medium text-gray-500">Secure URL</dt>
+                        <dt class="text-sm font-medium text-gray-500">Local Path</dt>
                         <dd class="mt-1 text-sm text-gray-900">
                             <div class="flex items-center space-x-2">
-                                <span class="truncate">{{ result.blob_url[:50] }}...</span>
-                                <button onclick="copyToClipboard('{{ result.blob_url }}')" 
+                                <span class="truncate">{{ result.file_path }}</span>
+                                <button onclick="copyToClipboard('{{ result.file_path }}')" 
                                         class="text-indigo-600 hover:text-indigo-700 text-xs">
                                     <i class="fas fa-copy"></i> Copy
                                 </button>
@@ -117,14 +117,14 @@
                 </div>
                 <div class="ml-4">
                     <h3 class="text-lg font-medium text-green-800 mb-2">
-                        Your Photo is Secure
+                        Your Photo is Safe
                     </h3>
                     <ul class="text-sm text-green-700 space-y-1">
-                        <li>✅ Uploaded using secure HTTPS connection</li>
-                        <li>✅ Authenticated with Azure Managed Identity</li>
-                        <li>✅ Stored with encryption at rest</li>
-                        <li>✅ Access controlled with Azure RBAC</li>
-                        <li>✅ Private container - no public access</li>
+                        <li>✅ Stored locally on your machine</li>
+                        <li>✅ Fast and reliable local storage</li>
+                        <li>✅ No cloud dependencies required</li>
+                        <li>✅ Complete control over your data</li>
+                        <li>✅ Private and secure local access</li>
                     </ul>
                 </div>
             </div>

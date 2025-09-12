@@ -67,8 +67,8 @@
             <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-shadow duration-200">
                 <div class="aspect-w-1 aspect-h-1 bg-gray-100">
                     <img 
-                        src="/api/photos/{{ photo.name|urlencode }}/image" 
-                        alt="{{ photo.name.split('/')[-1] }}"
+                        src="/api/photos/{{ photo.filename|urlencode }}/image" 
+                        alt="{{ photo.filename }}"
                         class="w-full h-48 object-cover"
                         loading="lazy"
                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
@@ -84,7 +84,7 @@
                 
                 <div class="p-4">
                     <h3 class="font-medium text-gray-900 truncate mb-2">
-                        {{ photo.name.split('/')[-1] }}
+                        {{ photo.filename }}
                     </h3>
                     
                     <div class="space-y-1 text-xs text-gray-500">
@@ -124,12 +124,12 @@
 
                     <!-- Actions -->
                     <div class="mt-4 flex justify-between">
-                        <button onclick="showPhotoDetails('{{ photo.name }}')" 
+                        <button onclick="showPhotoDetails('{{ photo.filename }}')" 
                                 class="text-indigo-600 hover:text-indigo-700 text-sm font-medium">
                             <i class="fas fa-info-circle mr-1"></i>
                             Details
                         </button>
-                        <button onclick="deletePhoto('{{ photo.name }}')" 
+                        <button onclick="deletePhoto('{{ photo.filename }}')" 
                                 class="text-red-600 hover:text-red-700 text-sm font-medium">
                             <i class="fas fa-trash mr-1"></i>
                             Delete
@@ -173,18 +173,17 @@
     </div>
 
     <script>
-        async function showPhotoDetails(blobName) {
+        async function showPhotoDetails(filename) {
             try {
-                const response = await fetch(`/api/photos?prefix=${encodeURIComponent(blobName)}&limit=1`);
-                const data = await response.json();
-                const photo = data.photos[0];
+                const response = await fetch(`/api/photos/${encodeURIComponent(filename)}/details`);
+                const photo = await response.json();
                 
                 if (photo) {
                     document.getElementById('modalContent').innerHTML = `
                         <div class="space-y-4">
                             <div>
-                                <dt class="text-sm font-medium text-gray-500">Blob Name</dt>
-                                <dd class="mt-1 text-sm text-gray-900 break-all">${photo.name}</dd>
+                                <dt class="text-sm font-medium text-gray-500">Filename</dt>
+                                <dd class="mt-1 text-sm text-gray-900 break-all">${photo.filename}</dd>
                             </div>
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
@@ -237,10 +236,10 @@
             document.getElementById('photoModal').classList.add('hidden');
         }
 
-        async function deletePhoto(blobName) {
-            if (confirm(`Are you sure you want to delete "${blobName}"? This action cannot be undone.`)) {
+        async function deletePhoto(filename) {
+            if (confirm(`Are you sure you want to delete "${filename}"? This action cannot be undone.`)) {
                 try {
-                    const response = await fetch(`/api/photos/${encodeURIComponent(blobName)}`, {
+                    const response = await fetch(`/api/photos/${encodeURIComponent(filename)}`, {
                         method: 'DELETE'
                     });
                     

@@ -15,23 +15,23 @@ if ! command -v python3 &> /dev/null; then
     exit 1
 fi
 
-# Change to src directory
-cd src
-
 # Create uploads directory if it doesn't exist
-mkdir -p uploads/photos
+mkdir -p src/uploads/photos
 
 # Check if virtual environment exists
-if [ ! -d "../.venv" ]; then
+if [ ! -d ".venv" ]; then
     echo "📦 Creating virtual environment..."
-    python3 -m venv ../.venv
-    source ../.venv/bin/activate
+    python3 -m venv .venv
+    source .venv/bin/activate
     echo "📥 Installing dependencies..."
     pip install -r requirements.txt
 else
     echo "📦 Activating virtual environment..."
-    source ../.venv/bin/activate
+    source .venv/bin/activate
 fi
+
+# Change to src directory
+cd src
 
 echo "🚀 Starting FastAPI server..."
 echo "📱 Open your browser to: http://localhost:8000"
